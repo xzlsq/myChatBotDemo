@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import OpenAI from "openai";
-var chatContent = ref<string | null>('')
+import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
+
+type message = {
+  id: string,
+  role: string,
+  content: string
+}
+
+var chatContent = ref<message[]>([])
 var question = ref<string>('')
 
 const openai = new OpenAI({
@@ -16,8 +24,12 @@ async function main() {
     model: "deepseek-chat",
   });
 
-  chatContent.value = completion.choices[0].message.content
-  // console.log(completion.choices[0].message.content);
+  chatContent.value.push({
+    id: Date.now().toString(),
+    role: completion.choices[0].message.role,
+    content: completion.choices[0].message.content ?? ''
+  })
+
 }
 
 function resizeTextarea(e: any) {
@@ -35,8 +47,28 @@ function resizeTextarea(e: any) {
 }
 
 function sendQuestion(e: KeyboardEvent) {
+  // 按下回车开始请求
   if (e.code == 'Enter' && !e.shiftKey) {
     e.preventDefault()
+    var message: ChatCompletionMessageParam[] = [{ role: "user", content: question.value }]
+
+    chatContent.value.push({
+      id: Date.now().toString(),
+      role: "user",
+      content: question.value
+    })
+
+    openai.chat.completions.create({
+      messages: message,
+      model: "deepseek-chat",
+    }).then((res) => {
+      chatContent.value.push({
+        id: Date.now().toString(),
+        role: res.choices[0].message.role,
+        content: res.choices[0].message.content ?? ''
+      })
+    })
+    question.value = ''
   }
 }
 
@@ -51,7 +83,9 @@ main()
     </div>
     <div class="grow overflow-hidden flex flex-col items-center">
       <div class="grow w-full mt-14 px-8 pt-4 pb-2 ">
-        {{ chatContent }}
+        <p v-for="content of chatContent" :key="content.id">
+          {{ content.role }}: {{ content.content }}
+        </p>
       </div>
       <div class="w-[80%] min-h-16 px-4 py-2 border border-gray-400 bottom-14 
       rounded flex justify-center items-center mb-14">
