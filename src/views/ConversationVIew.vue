@@ -2,12 +2,7 @@
 import { ref } from 'vue'
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
-
-type message = {
-    id: string,
-    role: string,
-    content: string
-}
+import type { message } from '@/types';
 
 var chatContent = ref<message[]>([])
 var question = ref<string>('')
