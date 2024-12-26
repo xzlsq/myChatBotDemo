@@ -1,7 +1,16 @@
 <script setup lang="ts">
+import { useChatStore } from '@/stores/ChatStore';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+var ChatStore = useChatStore()
+var router = useRouter()
 
-
-
+onMounted(() => {
+  ChatStore.initChatStore()
+  ChatStore.createConversation()
+  console.log(ChatStore.conversations)
+  // router.replace(`/chat/${ChatStore.conversations[0].chatId}`)
+})
 </script>
 
 <template>
@@ -10,9 +19,9 @@
       <div class="bg-gray-300 w-fit p-2 h-12 rounded-full flex items-center justify-center gap-2">
         <span>➕</span>发起新对话
       </div>
-      <div class="w-full grow flex flex-col items-center overflow-auto">
-        <RouterLink to="/chat/1" class="w-[90%] rounded-lg bg-slate-300 p-2 [&.router-link-exact-active]:bg-blue-300">
-          新的对话
+      <div class="w-full grow flex flex-col items-center overflow-auto gap-2">
+        <RouterLink :to="`/chat/${chat.chatId}`" v-for="chat of ChatStore.conversations" class="w-[90%] rounded-lg bg-slate-300 p-2 truncate [&.router-link-exact-active]:bg-blue-300">
+          {{ chat.title }}
         </RouterLink>
       </div>
     </div>
