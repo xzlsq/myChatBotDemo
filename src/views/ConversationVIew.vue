@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { useChatStore } from '@/stores/ChatStore';
@@ -8,7 +8,7 @@ import { useRoute } from 'vue-router';
 var ChatStore = useChatStore()
 var route = useRoute()
 var question = ref<string>('')
-var idx = ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId)
+var idx = computed(() => ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId))
 
 const openai = new OpenAI({
     baseURL: 'https://api.deepseek.com',
