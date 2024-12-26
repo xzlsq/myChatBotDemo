@@ -12,7 +12,7 @@ const router = createRouter({
       component: HomeView,
       children: [
         {
-          path: 'chat/:chatid',
+          path: 'chat/:chatId',
           component: ConversationVIew,
         }
       ]
