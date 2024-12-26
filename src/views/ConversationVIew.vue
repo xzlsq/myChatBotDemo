@@ -2,30 +2,19 @@
 import { ref } from 'vue'
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
-import type { message } from '@/types';
+import { useChatStore } from '@/stores/ChatStore';
+import { useRoute } from 'vue-router';
 
-var chatContent = ref<message[]>([])
+var ChatStore = useChatStore()
+var route = useRoute()
 var question = ref<string>('')
+var idx = ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId)
 
 const openai = new OpenAI({
     baseURL: 'https://api.deepseek.com',
     apiKey: 'sk-f0467fd3f70d4d2eb0fbdf49d67127bc',
     dangerouslyAllowBrowser: true
 });
-
-async function main() {
-    const completion = await openai.chat.completions.create({
-        messages: [{ role: "system", content: "You are a helpful assistant." }],
-        model: "deepseek-chat",
-    });
-
-    chatContent.value.push({
-        id: completion.created.toString(),
-        role: completion.choices[0].message.role,
-        content: completion.choices[0].message.content ?? ''
-    })
-
-}
 
 function resizeTextarea(e: any) {
     var textarea = e.target
@@ -47,7 +36,7 @@ function sendQuestion(e: KeyboardEvent) {
         e.preventDefault()
         var message: ChatCompletionMessageParam[] = [{ role: "user", content: question.value }]
 
-        chatContent.value.push({
+        ChatStore.addDialog(route.params.chatId as string, {
             id: Date.now().toString(),
             role: "user",
             content: question.value
@@ -58,7 +47,7 @@ function sendQuestion(e: KeyboardEvent) {
             model: "deepseek-chat",
         }).then((res) => {
             console.log(res.choices[0])
-            chatContent.value.push({
+            ChatStore.addDialog(route.params.chatId as string, {
                 id: res.created.toString(),
                 role: res.choices[0].message.role,
                 content: res.choices[0].message.content ?? ''
@@ -68,17 +57,18 @@ function sendQuestion(e: KeyboardEvent) {
     }
 }
 
-// main()
 
 </script>
 
 <template>
     <div name="输出框" class="w-full h-full overflow-hidden flex flex-col items-center">
         <div class="w-full h-14 flex items-center justify-center text-2xl border-b border-black">
-            新的聊天
+            <div class="w-[200px] truncate">
+                {{ ChatStore.conversations[idx].title }}
+            </div>
         </div>
         <div class="grow w-full px-8 pt-4 pb-2 ">
-            <p v-for="content of chatContent" :key="content.id">
+            <p v-for="content of ChatStore.conversations[idx].history" :key="content.id">
                 {{ content.role }}: {{ content.content }}
             </p>
         </div>
