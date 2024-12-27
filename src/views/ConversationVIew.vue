@@ -45,7 +45,12 @@ function sendQuestion(e: KeyboardEvent) {
         var chatContext: ChatCompletionMessageParam[] = ChatStore.conversations[idx.value].history.map((it) => {
             return { role: it.role, content: it.content } as ChatCompletionMessageParam
         })
-        divRef.value!.innerHTML = divRef.value!.innerHTML + marked.parse(question.value)
+        divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(question.value)}</div>`
+        // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
+        divRef.value!.lastElementChild!.scrollIntoView({
+            block: 'end',
+            behavior: 'smooth'
+        })
         // console.log(chatCotext, ChatStore.conversations[idx.value].history)
 
         openai.chat.completions.create({
@@ -59,7 +64,12 @@ function sendQuestion(e: KeyboardEvent) {
                 content: res.choices[0].message.content ?? ''
             })
             
-            divRef.value!.innerHTML = divRef.value!.innerHTML + marked.parse(res.choices[0].message.content ?? '')
+            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(res.choices[0].message.content ?? '')}</div>`
+            // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
+            divRef.value!.lastElementChild!.scrollIntoView({
+                block: 'end',
+                behavior: 'smooth'
+            })
         })
 
         question.value = ''
