@@ -78,15 +78,15 @@ onMounted(() => {
 
 <template>
     <div name="输出框" class="w-full h-full overflow-hidden flex flex-col items-center">
-        <div class="w-full h-[80px] flex items-center justify-center text-2xl border-b border-black">
+        <div class="w-full h-14 shrink-0 flex items-center justify-center text-2xl border-b border-black">
             <div class="max-w-[200px] truncate">
                 {{ ChatStore.conversations[idx].title }}
             </div>
         </div>
-        <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto">
+        <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto space-y-4">
             
         </div>
-        <div name="输入框" class="w-[80%] min-h-16 px-4 py-2 border border-gray-400 bottom-14 
+        <div name="输入框" class="w-[80%] min-h-16 px-4 py-2 border shrink-0 border-gray-400 bottom-14 
       rounded flex justify-center items-center mb-14">
             <textarea @input="(e) => resizeTextarea(e)" v-model="question"
                 class="w-full box-border h-fit resize-none outline-none overflow-hidden"
