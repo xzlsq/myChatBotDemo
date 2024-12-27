@@ -14,7 +14,7 @@ export const useChatStore = defineStore('chatRecord', () => {
 
   // 记录某个对话的聊天上下文
   function addDialog(id: string, message: message) {
-    var idx =  conversations.value.findIndex(it => it.chatId == id)
+    var idx = conversations.value.findIndex(it => it.chatId == id)
     if (idx >= 0) {
       // 是否是该聊天的首次对话
       if (conversations.value[idx].history.length == 0) {
@@ -44,7 +44,10 @@ export const useChatStore = defineStore('chatRecord', () => {
     }
     conversations.value = conversation
   }
+  if (conversations.value.length == 0) {
+    initChatStore()
+  }
 
-  return {conversations, addDialog, createConversation, initChatStore}
+  return { conversations, addDialog, createConversation, initChatStore }
 
 })
