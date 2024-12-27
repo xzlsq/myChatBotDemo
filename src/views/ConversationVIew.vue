@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { useChatStore } from '@/stores/ChatStore';
 import { useRoute } from 'vue-router';
+import { marked } from 'marked';
 
 var ChatStore = useChatStore()
 var route = useRoute()
 var question = ref<string>('')
 var idx = computed(() => ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId))
+var divRef = useTemplateRef('output')
 
 const openai = new OpenAI({
     baseURL: 'https://api.deepseek.com',
@@ -43,7 +45,7 @@ function sendQuestion(e: KeyboardEvent) {
         var chatContext: ChatCompletionMessageParam[] = ChatStore.conversations[idx.value].history.map((it) => {
             return { role: it.role, content: it.content } as ChatCompletionMessageParam
         })
-
+        divRef.value!.innerHTML = divRef.value!.innerHTML + marked.parse(question.value)
         // console.log(chatCotext, ChatStore.conversations[idx.value].history)
 
         openai.chat.completions.create({
@@ -56,26 +58,33 @@ function sendQuestion(e: KeyboardEvent) {
                 role: res.choices[0].message.role,
                 content: res.choices[0].message.content ?? ''
             })
+            
+            divRef.value!.innerHTML = divRef.value!.innerHTML + marked.parse(res.choices[0].message.content ?? '')
         })
 
         question.value = ''
     }
 }
 
+onMounted(() => {
+    if (ChatStore.conversations[idx.value].history.length > 0) {
+        for (let chat of ChatStore.conversations[idx.value].history) {
+            divRef.value!.innerHTML = divRef.value!.innerHTML + marked.parse(chat.content)
+        }
+    }
+})
 
 </script>
 
 <template>
     <div name="输出框" class="w-full h-full overflow-hidden flex flex-col items-center">
-        <div class="w-full h-14 flex items-center justify-center text-2xl border-b border-black">
-            <div class="w-[200px] truncate">
+        <div class="w-full h-[80px] flex items-center justify-center text-2xl border-b border-black">
+            <div class="max-w-[200px] truncate">
                 {{ ChatStore.conversations[idx].title }}
             </div>
         </div>
-        <div class="grow w-full px-8 pt-4 pb-2 ">
-            <p v-for="content of ChatStore.conversations[idx].history" :key="content.id">
-                {{ content.role }}: {{ content.content }}
-            </p>
+        <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto">
+            
         </div>
         <div name="输入框" class="w-[80%] min-h-16 px-4 py-2 border border-gray-400 bottom-14 
       rounded flex justify-center items-center mb-14">
