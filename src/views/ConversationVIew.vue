@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { useChatStore } from '@/stores/ChatStore';
@@ -36,7 +36,7 @@ function sendQuestion(e: KeyboardEvent) {
     // 按下回车开始请求
     if (e.code == 'Enter' && !e.shiftKey) {
         e.preventDefault()
-        
+
         ChatStore.addDialog(route.params.chatId as string, {
             id: Date.now().toString(),
             role: "user",
@@ -63,7 +63,7 @@ function sendQuestion(e: KeyboardEvent) {
                 role: res.choices[0].message.role,
                 content: res.choices[0].message.content ?? ''
             })
-            
+
             divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(res.choices[0].message.content ?? '')}</div>`
             // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
             divRef.value!.lastElementChild!.scrollIntoView({
@@ -76,10 +76,25 @@ function sendQuestion(e: KeyboardEvent) {
     }
 }
 
+watch(idx, () => {
+    divRef.value!.innerHTML = ''
+    for (let chat of ChatStore.conversations[idx.value].history) {
+        if (chat.role == 'user') {
+            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(chat.content)}</div>`
+        } else {
+            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
+        }
+    }
+
+})
+
 onMounted(() => {
-    if (ChatStore.conversations[idx.value].history.length > 0) {
-        for (let chat of ChatStore.conversations[idx.value].history) {
-            divRef.value!.innerHTML = divRef.value!.innerHTML + marked.parse(chat.content)
+    divRef.value!.innerHTML = ''
+    for (let chat of ChatStore.conversations[idx.value].history) {
+        if (chat.role == 'user') {
+            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(chat.content)}</div>`
+        } else {
+            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
         }
     }
 })
@@ -94,7 +109,7 @@ onMounted(() => {
             </div>
         </div>
         <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto space-y-4">
-            
+
         </div>
         <div name="输入框" class="w-[80%] min-h-16 px-4 py-2 border shrink-0 border-gray-400 bottom-14 
       rounded flex justify-center items-center mb-14">
