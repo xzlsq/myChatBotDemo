@@ -34,25 +34,30 @@ function sendQuestion(e: KeyboardEvent) {
     // 按下回车开始请求
     if (e.code == 'Enter' && !e.shiftKey) {
         e.preventDefault()
-        var message: ChatCompletionMessageParam[] = [{ role: "user", content: question.value }]
-
+        
         ChatStore.addDialog(route.params.chatId as string, {
             id: Date.now().toString(),
             role: "user",
             content: question.value
         })
+        var chatContext: ChatCompletionMessageParam[] = ChatStore.conversations[idx.value].history.map((it) => {
+            return { role: it.role, content: it.content } as ChatCompletionMessageParam
+        })
+
+        // console.log(chatCotext, ChatStore.conversations[idx.value].history)
 
         openai.chat.completions.create({
-            messages: message,
+            messages: chatContext,
             model: "deepseek-chat",
         }).then((res) => {
-            console.log(res.choices[0])
+            // console.log(res.choices[0])
             ChatStore.addDialog(route.params.chatId as string, {
                 id: res.created.toString(),
                 role: res.choices[0].message.role,
                 content: res.choices[0].message.content ?? ''
             })
         })
+
         question.value = ''
     }
 }
