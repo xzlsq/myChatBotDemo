@@ -12,7 +12,6 @@ export async function integrateToMd(stream: Stream<OpenAI.Chat.Completions.ChatC
     var idCodeChunk = false
 
     for await (let chunk of stream) {
-        // debugger
         str += chunk.choices[0]?.delta?.content ?? ''
         res[0].content += chunk.choices[0]?.delta?.content ?? ''
         // 只有第一个chunk带有role信息
@@ -28,6 +27,11 @@ export async function integrateToMd(stream: Stream<OpenAI.Chat.Completions.ChatC
             parseRes = ''
             str = ''
         }
+    }
+
+    if (str.length != 0) {
+        parseRes = marked.parse(str) as string
+        divEle.innerHTML += parseRes
     }
 
     // console.log(res[0].content)
