@@ -5,6 +5,7 @@ import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { useChatStore } from '@/stores/ChatStore';
 import { useRoute } from 'vue-router';
 import { marked } from 'marked';
+import { integrateToMd } from '@/parseMd';
 
 var ChatStore = useChatStore()
 var route = useRoute()
@@ -32,7 +33,7 @@ function resizeTextarea(e: any) {
     }
 }
 
-function sendQuestion(e: KeyboardEvent) {
+async function sendQuestion(e: KeyboardEvent) {
     // 按下回车开始请求
     if (e.code == 'Enter' && !e.shiftKey) {
         e.preventDefault()
@@ -45,34 +46,40 @@ function sendQuestion(e: KeyboardEvent) {
         var chatContext: ChatCompletionMessageParam[] = ChatStore.conversations[idx.value].history.map((it) => {
             return { role: it.role, content: it.content } as ChatCompletionMessageParam
         })
+
         divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(question.value)}</div>`
         // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
         divRef.value!.lastElementChild!.scrollIntoView({
             block: 'end',
             behavior: 'smooth'
         })
-        // console.log(chatCotext, ChatStore.conversations[idx.value].history)
-
-        openai.chat.completions.create({
-            messages: chatContext,
-            model: "deepseek-chat",
-        }).then((res) => {
-            // console.log(res.choices[0])
-            ChatStore.addDialog(route.params.chatId as string, {
-                id: res.created.toString(),
-                role: res.choices[0].message.role,
-                content: res.choices[0].message.content ?? ''
-            })
-
-            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(res.choices[0].message.content ?? '')}</div>`
-            // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
-            divRef.value!.lastElementChild!.scrollIntoView({
-                block: 'end',
-                behavior: 'smooth'
-            })
-        })
 
         question.value = ''
+
+        var resStream = await openai.chat.completions.create({
+            messages: chatContext,
+            model: "deepseek-chat",
+            stream: true,
+        })
+
+        // 创建一个class="system w-full space-y-2"的div，用于显示completions
+        var systemDiv = document.createElement('div')
+        systemDiv.classList.add('system', 'w-full', 'space-y-2')
+        divRef.value!.appendChild(systemDiv)
+        var res = await integrateToMd(resStream, systemDiv)
+
+        ChatStore.addDialog(route.params.chatId as string,  {
+            id: Date.now().toString(),
+            role: res[0].role,
+            content: res[0].content
+        })
+
+        // divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(res[0].content)}</div>`
+        // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
+        divRef.value!.lastElementChild!.scrollIntoView({
+            block: 'end',
+            behavior: 'smooth'
+        })
     }
 }
 
