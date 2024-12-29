@@ -5,7 +5,7 @@ import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { useChatStore } from '@/stores/ChatStore';
 import { useRoute } from 'vue-router';
 import { marked } from 'marked';
-import { convertToMd } from '@/parseMd';
+import { convertToHTML } from '@/parseMd';
 import { resizeTextarea } from '@/hooks';
 
 var ChatStore = useChatStore()
@@ -21,6 +21,11 @@ const openai = new OpenAI({
 });
 
 async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
+    var textarea: any = e?.target
+    if (textarea) {
+        textarea.style.height = 'auto';
+    }
+
     // 按下回车开始请求
     if (e?.code == 'Enter' && !e?.shiftKey || manual) {
         e?.preventDefault()
@@ -42,7 +47,6 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
         })
 
         question.value = ''
-
         var resStream = await openai.chat.completions.create({
             messages: chatContext,
             model: "deepseek-chat",
@@ -50,10 +54,10 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
         })
 
         // 创建一个class="system w-full space-y-2"的div，用于显示completions
-        var systemDiv = document.createElement('div')
-        systemDiv.classList.add('system', 'w-full', 'space-y-2')
-        divRef.value!.appendChild(systemDiv)
-        var res = await convertToMd(resStream, systemDiv)
+        var completionsDiv = document.createElement('div')
+        completionsDiv.classList.add('system', 'w-full', 'space-y-2')
+        divRef.value!.appendChild(completionsDiv)
+        var res = await convertToHTML(resStream, completionsDiv, divRef.value!)
 
         ChatStore.addDialog(route.params.chatId as string,  {
             id: Date.now().toString(),
@@ -62,11 +66,6 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
         })
 
         // divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(res[0].content)}</div>`
-        // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
-        divRef.value!.lastElementChild!.scrollIntoView({
-            block: 'end',
-            behavior: 'smooth'
-        })
     }
 }
 
@@ -95,6 +94,7 @@ onMounted(() => {
     if (ChatStore.question.length > 0) {
         question.value = ChatStore.question
         sendQuestion(null, true)
+        ChatStore.question = ''
     }
 })
 
