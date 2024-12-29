@@ -5,7 +5,8 @@ import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { useChatStore } from '@/stores/ChatStore';
 import { useRoute } from 'vue-router';
 import { marked } from 'marked';
-import { integrateToMd } from '@/parseMd';
+import { convertToMd } from '@/parseMd';
+import { resizeTextarea } from '@/hooks';
 
 var ChatStore = useChatStore()
 var route = useRoute()
@@ -19,24 +20,10 @@ const openai = new OpenAI({
     dangerouslyAllowBrowser: true
 });
 
-function resizeTextarea(e: any) {
-    var textarea = e.target
-    // console.log(textarea.scrollHeight)
-    if (textarea.scrollHeight <= 200) {
-        textarea.classList.add('overflow-hidden')
-        textarea.classList.remove('overflow-auto')
-        textarea.style.height = 'auto'; // 先重置高度
-        textarea.style.height = (textarea.scrollHeight) + 'px';
-    } else {
-        textarea.classList.remove('overflow-hidden')
-        textarea.classList.add('overflow-auto')
-    }
-}
-
-async function sendQuestion(e: KeyboardEvent) {
+async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
     // 按下回车开始请求
-    if (e.code == 'Enter' && !e.shiftKey) {
-        e.preventDefault()
+    if (e?.code == 'Enter' && !e?.shiftKey || manual) {
+        e?.preventDefault()
 
         ChatStore.addDialog(route.params.chatId as string, {
             id: Date.now().toString(),
@@ -66,7 +53,7 @@ async function sendQuestion(e: KeyboardEvent) {
         var systemDiv = document.createElement('div')
         systemDiv.classList.add('system', 'w-full', 'space-y-2')
         divRef.value!.appendChild(systemDiv)
-        var res = await integrateToMd(resStream, systemDiv)
+        var res = await convertToMd(resStream, systemDiv)
 
         ChatStore.addDialog(route.params.chatId as string,  {
             id: Date.now().toString(),
@@ -104,6 +91,11 @@ onMounted(() => {
             divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
         }
     }
+    // 如果是通过homeView输入框创建的对话，则组件加载成功后主动发送在homeView输入框填写的问题
+    if (ChatStore.question.length > 0) {
+        question.value = ChatStore.question
+        sendQuestion(null, true)
+    }
 })
 
 </script>
@@ -118,11 +110,11 @@ onMounted(() => {
         <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto space-y-4">
 
         </div>
-        <div name="输入框" class="w-[80%] min-h-16 px-4 py-2 border shrink-0 border-gray-400 bottom-14 
+        <div name="输入框" class="w-[80%] min-h-16 px-4 my-2 border shrink-0 border-gray-400 bottom-14 
       rounded flex justify-center items-center mb-14">
             <textarea @input="(e) => resizeTextarea(e)" v-model="question"
                 class="w-full box-border h-fit resize-none outline-none overflow-hidden"
-                placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送" @keypress="(e) => sendQuestion(e)"></textarea>
+                placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送" @keypress="(e) => sendQuestion(e, false)"></textarea>
         </div>
     </div>
 </template>
