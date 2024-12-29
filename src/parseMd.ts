@@ -2,9 +2,9 @@ import { marked } from "marked";
 import type OpenAI from "openai/index.mjs";
 import type { Stream } from "openai/streaming.mjs";
 
-export async function convertToMd(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk> & {
+export async function convertToHTML(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk> & {
     _request_id?: string | null;
-}, divEle: HTMLDivElement) 
+}, divEle: HTMLDivElement, outputDivEle: HTMLDivElement) 
 {
     var res: { role: string, content: string}[] = [{ role: 'assistant', content: '' }]
     var parseRes: string = ''
@@ -26,6 +26,10 @@ export async function convertToMd(stream: Stream<OpenAI.Chat.Completions.ChatCom
             divEle.innerHTML += parseRes
             parseRes = ''
             str = ''
+            // 将聊天框的滚动位置设置到底部，确保最新添加的消息始终可见。
+            // scrollHeight 是聊天框内容的完整高度，scrollTop 是当前滚动的位置。
+            // 将 scrollTop 设置为 scrollHeight 即可滚动到底部。
+            outputDivEle.scrollTop = outputDivEle.scrollHeight
         }
     }
 
@@ -33,7 +37,7 @@ export async function convertToMd(stream: Stream<OpenAI.Chat.Completions.ChatCom
         parseRes = marked.parse(str) as string
         divEle.innerHTML += parseRes
     }
-
+    outputDivEle.scrollTop = outputDivEle.scrollHeight
     // console.log(res[0].content)
 
     return res
