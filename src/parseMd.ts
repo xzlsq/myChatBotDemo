@@ -2,7 +2,7 @@ import { marked } from "marked";
 import type OpenAI from "openai/index.mjs";
 import type { Stream } from "openai/streaming.mjs";
 
-export async function integrateToMd(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk> & {
+export async function convertToMd(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk> & {
     _request_id?: string | null;
 }, divEle: HTMLDivElement) 
 {
