@@ -11,6 +11,7 @@ type Conversations = {
 
 export const useChatStore = defineStore('chatRecord', () => {
   var conversations = ref<Conversations[]>([])
+  var question = ref('')
 
   // 记录某个对话的聊天上下文
   function addDialog(id: string, message: message) {
@@ -48,6 +49,6 @@ export const useChatStore = defineStore('chatRecord', () => {
     initChatStore()
   }
 
-  return { conversations, addDialog, createConversation, initChatStore }
+  return { conversations, question, addDialog, createConversation, initChatStore }
 
 })
