@@ -10,6 +10,7 @@ type Conversations = {
 }
 
 type ChatConfig = {
+  model: string,
   temperature: number,
   top_p: number,
   max_tokens: number,
@@ -20,7 +21,8 @@ type ChatConfig = {
 export const useChatStore = defineStore('chatRecord', () => {
   var conversations = ref<Conversations[]>([])
   var question = ref('')
-  var chatConfig = ref<ChatConfig>({
+  var chatConfig = ref({
+    model: localStorage.chatConfig.model ?? "deepseek-chat",
     temperature: localStorage.chatConfig.temperature ?? 1,
     top_p: localStorage.chatConfig.top_p ?? 1,
     max_tokens: localStorage.chatConfig.max_tokens ?? 4096,
@@ -51,7 +53,7 @@ export const useChatStore = defineStore('chatRecord', () => {
     localStorage.conversations = JSON.stringify(conversations.value)
   }
   // 设置大模型参数
-  function setChatConfig(option: keyof ChatConfig, value: number) {
+  function setChatConfig(option: keyof ChatConfig, value: number | string) {
     if (option && value) {
       chatConfig.value[option] = value
       localStorage.chatConfig[option] = value
