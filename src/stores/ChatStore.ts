@@ -9,9 +9,24 @@ type Conversations = {
   history: message[]
 }
 
+type ChatConfig = {
+  temperature: number,
+  top_p: number,
+  max_tokens: number,
+  presence_penalty: number,
+  frequency_penalty: number
+}
+
 export const useChatStore = defineStore('chatRecord', () => {
   var conversations = ref<Conversations[]>([])
   var question = ref('')
+  var chatConfig = ref<ChatConfig>({
+    temperature: localStorage.chatConfig.temperature ?? 1,
+    top_p: localStorage.chatConfig.top_p ?? 1,
+    max_tokens: localStorage.chatConfig.max_tokens ?? 4096,
+    presence_penalty: localStorage.chatConfig.presence_penalty ?? 0,
+    frequency_penalty: localStorage.chatConfig.frequency_penalty ?? 0,
+  })
 
   // 记录某个对话的聊天上下文
   function addDialog(id: string, message: message) {
@@ -35,6 +50,13 @@ export const useChatStore = defineStore('chatRecord', () => {
     })
     localStorage.conversations = JSON.stringify(conversations.value)
   }
+  // 设置大模型参数
+  function setChatConfig(option: keyof ChatConfig, value: number) {
+    if (option && value) {
+      chatConfig.value[option] = value
+      localStorage.chatConfig[option] = value
+    }
+  }
 
   function initChatStore() {
     let conversation: Conversations[] = []
@@ -43,12 +65,23 @@ export const useChatStore = defineStore('chatRecord', () => {
     } else {
       conversation = []
     }
+    if (!localStorage.chatConfig) {
+      localStorage.chatConfig = chatConfig.value
+    }
     conversations.value = conversation
   }
   if (conversations.value.length == 0) {
     initChatStore()
   }
 
-  return { conversations, question, addDialog, createConversation, initChatStore }
+  return { 
+    conversations, 
+    question, 
+    chatConfig, 
+    addDialog, 
+    createConversation, 
+    initChatStore, 
+    setChatConfig 
+  }
 
 })
