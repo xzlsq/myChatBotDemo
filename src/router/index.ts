@@ -14,7 +14,11 @@ const router = createRouter({
         {
           path: 'chat/:chatId',
           component: ConversationVIew,
-        }
+        },
+        {
+          path: 'setting',
+          component: import('@/views/Setting.vue'),
+        },
       ]
     },
   ],
