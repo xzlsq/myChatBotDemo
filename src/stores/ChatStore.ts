@@ -22,12 +22,16 @@ export const useChatStore = defineStore('chatRecord', () => {
   var conversations = ref<Conversations[]>([])
   var question = ref('')
   var chatConfig = ref({
-    model: localStorage.chatConfig.model ?? "deepseek-chat",
-    temperature: localStorage.chatConfig.temperature ?? 1,
-    top_p: localStorage.chatConfig.top_p ?? 1,
-    max_tokens: localStorage.chatConfig.max_tokens ?? 4096,
-    presence_penalty: localStorage.chatConfig.presence_penalty ?? 0,
-    frequency_penalty: localStorage.chatConfig.frequency_penalty ?? 0,
+    model: localStorage?.chatConfig?.model ?? "deepseek-chat",
+    temperature: localStorage?.chatConfig?.temperature ?? 1,
+    top_p: localStorage?.chatConfig?.top_p ?? 1,
+    max_tokens: localStorage?.chatConfig?.max_tokens ?? 4096,
+    presence_penalty: localStorage?.chatConfig?.presence_penalty ?? 0,
+    frequency_penalty: localStorage?.chatConfig?.frequency_penalty ?? 0,
+  })
+  var userConfig = ref({
+    baseURL: localStorage?.userConfig?.baseURL ?? 'https://api.deepseek.com',
+    apiKey: localStorage?.userConfig?.apiKey ?? 'sk-f0467fd3f70d4d2eb0fbdf49d67127bc',
   })
 
   // 记录某个对话的聊天上下文
@@ -59,6 +63,13 @@ export const useChatStore = defineStore('chatRecord', () => {
       localStorage.chatConfig[option] = value
     }
   }
+  // 设置用户baseURL和apiKey
+  function setUserConfig(option: keyof {baseURL:string, apiKey: string}, value: number | string) {
+    if (option && value) {
+      userConfig.value[option] = value
+      localStorage.userConfig[option] = value
+    }
+  }
 
   function initChatStore() {
     let conversation: Conversations[] = []
@@ -70,6 +81,9 @@ export const useChatStore = defineStore('chatRecord', () => {
     if (!localStorage.chatConfig) {
       localStorage.chatConfig = chatConfig.value
     }
+    if (!localStorage.userConfig) {
+      localStorage.userConfig = userConfig.value
+    }
     conversations.value = conversation
   }
   if (conversations.value.length == 0) {
@@ -80,10 +94,12 @@ export const useChatStore = defineStore('chatRecord', () => {
     conversations, 
     question, 
     chatConfig, 
+    userConfig,
     addDialog, 
     createConversation, 
     initChatStore, 
-    setChatConfig 
+    setChatConfig,
+    setUserConfig
   }
 
 })
