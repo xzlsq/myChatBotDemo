@@ -28,6 +28,9 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
 
     // 按下回车开始请求
     if (e?.code == 'Enter' && !e?.shiftKey || manual) {
+        if (question.value.length == 0) {
+            return
+        }
         e?.preventDefault()
 
         ChatStore.addDialog(route.params.chatId as string, {
@@ -65,7 +68,6 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             content: res[0].content
         })
 
-        // divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(res[0].content)}</div>`
     }
 }
 
