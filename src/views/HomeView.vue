@@ -7,11 +7,13 @@ import { resizeTextarea } from '@/hooks';
 var ChatStore = useChatStore()
 var router = useRouter()
 var route = useRoute()
-console.log(route.fullPath)
 
 // 通过输入框创建新的对话
 function createNewConversation(e: KeyboardEvent) {
   if (e.code == 'Enter' && !e.shiftKey) {
+    if (ChatStore.question.length == 0) {
+      return
+    }
     ChatStore.createConversation()
     router.replace(`/chat/${ChatStore.conversations[0].chatId}`)
   }
