@@ -15,8 +15,7 @@ var idx = computed(() => ChatStore.conversations.findIndex(it => it.chatId == ro
 var divRef = useTemplateRef('output')
 
 const openai = new OpenAI({
-    baseURL: 'https://api.deepseek.com',
-    apiKey: 'sk-f0467fd3f70d4d2eb0fbdf49d67127bc',
+    ...ChatStore.userConfig,
     dangerouslyAllowBrowser: true
 });
 
@@ -52,8 +51,8 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
         question.value = ''
         var resStream = await openai.chat.completions.create({
             messages: chatContext,
-            model: "deepseek-chat",
             stream: true,
+            ...ChatStore.chatConfig,
         })
 
         // 创建一个class="system w-full space-y-2"的div，用于显示completions
@@ -62,7 +61,7 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
         divRef.value!.appendChild(completionsDiv)
         var res = await convertToHTML(resStream, completionsDiv, divRef.value!)
 
-        ChatStore.addDialog(route.params.chatId as string,  {
+        ChatStore.addDialog(route.params.chatId as string, {
             id: Date.now().toString(),
             role: res[0].role,
             content: res[0].content

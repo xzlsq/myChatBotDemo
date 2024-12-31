@@ -8,6 +8,7 @@ export async function convertToHTML(stream: Stream<OpenAI.Chat.Completions.ChatC
 {
     var res: { role: string, content: string}[] = [{ role: 'assistant', content: '' }]
     var parseRes: string = ''
+    // 保存完整的句子
     var str = ''
     var idCodeChunk = false
 
