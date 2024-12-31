@@ -21,17 +21,17 @@ type ChatConfig = {
 export const useChatStore = defineStore('chatRecord', () => {
   var conversations = ref<Conversations[]>([])
   var question = ref('')
-  var chatConfig = ref({
-    model: localStorage?.chatConfig?.model ?? "deepseek-chat",
-    temperature: localStorage?.chatConfig?.temperature ?? 1,
-    top_p: localStorage?.chatConfig?.top_p ?? 1,
-    max_tokens: localStorage?.chatConfig?.max_tokens ?? 4096,
-    presence_penalty: localStorage?.chatConfig?.presence_penalty ?? 0,
-    frequency_penalty: localStorage?.chatConfig?.frequency_penalty ?? 0,
+  var chatConfig = ref<ChatConfig>({
+    model: "deepseek-chat",
+    temperature: 1,
+    top_p: 1,
+    max_tokens: 4096,
+    presence_penalty: 0,
+    frequency_penalty: 0,
   })
   var userConfig = ref({
-    baseURL: localStorage?.userConfig?.baseURL ?? 'https://api.deepseek.com',
-    apiKey: localStorage?.userConfig?.apiKey ?? 'sk-f0467fd3f70d4d2eb0fbdf49d67127bc',
+    baseURL: 'https://api.deepseek.com',
+    apiKey: 'sk-f0467fd3f70d4d2eb0fbdf49d67127bc',
   })
 
   // 记录某个对话的聊天上下文
@@ -57,17 +57,19 @@ export const useChatStore = defineStore('chatRecord', () => {
     localStorage.conversations = JSON.stringify(conversations.value)
   }
   // 设置大模型参数
-  function setChatConfig(option: keyof ChatConfig, value: number | string) {
+  function setChatConfig(option: keyof ChatConfig, value: ChatConfig[keyof ChatConfig]) {
     if (option && value) {
-      chatConfig.value[option] = value
-      localStorage.chatConfig[option] = value
+      if (typeof value == 'string' && option == 'model') {
+        chatConfig.value[option] = value
+      }
+      localStorage.chatConfig = JSON.stringify(chatConfig.value)
     }
   }
   // 设置用户baseURL和apiKey
-  function setUserConfig(option: keyof {baseURL:string, apiKey: string}, value: number | string) {
+  function setUserConfig(option: keyof {baseURL:string, apiKey: string}, value: string) {
     if (option && value) {
       userConfig.value[option] = value
-      localStorage.userConfig[option] = value
+      localStorage.userConfig = JSON.stringify(userConfig.value)
     }
   }
 
@@ -79,10 +81,14 @@ export const useChatStore = defineStore('chatRecord', () => {
       conversation = []
     }
     if (!localStorage.chatConfig) {
-      localStorage.chatConfig = chatConfig.value
+      localStorage.chatConfig = JSON.stringify(chatConfig.value)
+    } else {
+      chatConfig.value = JSON.parse(localStorage.chatConfig)
     }
     if (!localStorage.userConfig) {
-      localStorage.userConfig = userConfig.value
+      localStorage.userConfig = JSON.stringify(userConfig.value)
+    } else {
+      userConfig.value = JSON.parse(localStorage.userConfig)
     }
     conversations.value = conversation
   }
