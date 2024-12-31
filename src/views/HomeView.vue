@@ -41,6 +41,9 @@ onMounted(() => {
           {{ chat.title }}
         </RouterLink>
       </div>
+      <button @click="router.push('/setting')" class="bg-gray-300 w-fit px-4 py-2 h-12 rounded-full flex items-center justify-center gap-2">
+        <span>⚙️</span>设置
+      </button>
     </div>
     <div name="输出框" class="grow overflow-hidden flex flex-col items-center justify-center">
       <RouterView></RouterView>
