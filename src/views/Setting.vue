@@ -9,16 +9,16 @@ var router = useRouter()
 </script>
 
 <template>
-    <div class="w-full h-full px-10 overflow-hidden">
+    <div class="w-full h-full px-10 pb-14 flex flex-col overflow-hidden">
         <h1 class="h-14 flex items-center text-2xl gap-2">
             <button @click="router.go(-1)" class="w-10 h-10 flex items-center justify-center p-2 border rounded hover:bg-gray-200 transition-all">
                 <el-icon size="24">
                     <ArrowLeftBold />
                 </el-icon>
             </button>
-            <span class="flex items-center">设置</span>
+            <span class="flex items-center ">设置</span>
         </h1>
-        <div class="border mt-4 w-full h-full rounded-lg overflow-auto shadow divide-y">
+        <div class="border mt-2 w-full h-full rounded-lg overflow-auto shadow divide-y">
             <div class="flex justify-between items-center h-14 w-full  p-2">
                 <div class="h-14 flex items-center justify-center">字体大小</div>
                 <div class="h-10 w-[200px] px-4 flex items-center justify-center border rounded gap-2">
