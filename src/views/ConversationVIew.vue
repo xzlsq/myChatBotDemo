@@ -2,13 +2,14 @@
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
-import { useChatStore } from '@/stores/ChatStore';
+import { useChatStore, usePageStore } from '@/stores/ChatStore';
 import { useRoute } from 'vue-router';
 import { marked } from 'marked';
 import { convertToHTML } from '@/parseMd';
 import { resizeTextarea } from '@/hooks';
 
 var ChatStore = useChatStore()
+var PageConfig = usePageStore()
 var route = useRoute()
 var question = ref<string>('')
 var idx = computed(() => ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId))
@@ -37,9 +38,16 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             role: "user",
             content: question.value
         })
-        var chatContext: ChatCompletionMessageParam[] = ChatStore.conversations[idx.value].history.map((it) => {
-            return { role: it.role, content: it.content } as ChatCompletionMessageParam
-        })
+        var chatContext: ChatCompletionMessageParam[] = []
+        if (PageConfig.historyMessage < ChatStore.conversations[idx.value].history.length) {
+            chatContext = ChatStore.conversations[idx.value].history.slice(-PageConfig.historyMessage).map((it) => {
+                return { role: it.role, content: it.content } as ChatCompletionMessageParam
+            })
+        } else {
+            chatContext = ChatStore.conversations[idx.value].history.map((it) => {
+                return { role: it.role, content: it.content } as ChatCompletionMessageParam
+            })
+        }
 
         divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(question.value)}</div>`
         // 当出现滚动条时，有新内容添加时则自动滚动到新内容处

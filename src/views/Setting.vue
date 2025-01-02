@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useChatStore } from '@/stores/ChatStore';
+import { useChatStore, usePageStore } from '@/stores/ChatStore';
 import { useRouter } from 'vue-router';
-var fontSize = ref(12)
-var historyMessage = ref(4)
+var PageConfig = usePageStore()
 var ChatStore = useChatStore()
 var router = useRouter()
 </script>
@@ -63,8 +61,8 @@ var router = useRouter()
             <div class="flex justify-between items-center h-14 w-full  p-2">
                 <div class="h-14 flex items-center justify-center">附带历史消息数</div>
                 <div class="h-10 w-[200px] px-4 flex items-center justify-center border rounded gap-2">
-                    <span class="w-[40px]">{{ historyMessage }}</span>
-                    <el-slider :min="0" :max="64" :step="1" v-model="historyMessage" />
+                    <span class="w-[40px]">{{ PageConfig.historyMessage }}</span>
+                    <el-slider :min="0" :max="64" :step="1" :change="PageConfig.setHistoryMessage(PageConfig.historyMessage)" v-model="PageConfig.historyMessage" />
                 </div>
             </div>
         </div>
