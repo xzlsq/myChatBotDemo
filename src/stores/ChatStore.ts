@@ -66,7 +66,7 @@ export const useChatStore = defineStore('chatRecord', () => {
     }
   }
   // 设置用户baseURL和apiKey
-  function setUserConfig(option: keyof {baseURL:string, apiKey: string}, value: string) {
+  function setUserConfig(option: keyof { baseURL: string, apiKey: string }, value: string) {
     if (option && value) {
       userConfig.value[option] = value
       localStorage.userConfig = JSON.stringify(userConfig.value)
@@ -96,16 +96,39 @@ export const useChatStore = defineStore('chatRecord', () => {
     initChatStore()
   }
 
-  return { 
-    conversations, 
-    question, 
-    chatConfig, 
+  return {
+    conversations,
+    question,
+    chatConfig,
     userConfig,
-    addDialog, 
-    createConversation, 
-    initChatStore, 
+    addDialog,
+    createConversation,
+    initChatStore,
     setChatConfig,
     setUserConfig
   }
 
+})
+
+export const usePageStore = defineStore('PageConfig', () => {
+  var fontSize = ref<number>(localStorage.fontSize ? Number(localStorage.fontSize) : 12)
+  var historyMessage = ref<number>(localStorage.historyMessage ? Number(localStorage.historyMessage) : 4)
+
+  function setFontSize(val: number) {
+    fontSize.value = val
+    localStorage.fontSize = val
+    document.documentElement.style.setProperty('--font-size', (val + 'px'))
+  }
+
+  function setHistoryMessage(val: number) {
+    historyMessage.value = val
+    localStorage.historyMessage = val
+  }
+
+  return {
+    fontSize,
+    historyMessage,
+    setFontSize,
+    setHistoryMessage
+  }
 })
