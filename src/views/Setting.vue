@@ -22,8 +22,8 @@ var router = useRouter()
             <div class="flex justify-between items-center h-14 w-full  p-2">
                 <div class="h-14 flex items-center justify-center">字体大小</div>
                 <div class="h-10 w-[200px] px-4 flex items-center justify-center border rounded gap-2">
-                    <span class="w-[40px]">{{ fontSize }}</span>
-                    <el-slider :min="12" :max="40" v-model="fontSize" />
+                    <span class="w-[40px]">{{ PageConfig.fontSize }}</span>
+                    <el-slider :min="12" :max="40" :change="PageConfig.setFontSize(PageConfig.fontSize)" v-model="PageConfig.fontSize" />
                 </div>
             </div>
             <div class="flex justify-between items-center h-14 w-full  p-2">
