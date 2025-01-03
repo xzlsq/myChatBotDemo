@@ -43,3 +43,11 @@ export async function convertToHTML(stream: Stream<OpenAI.Chat.Completions.ChatC
 
     return res
 }
+function createEle(name: string, ...attribute: string[]) {
+    var ele = document.createElement(name)
+    for (var attr of attribute) {
+        ele.setAttribute('class',attr)
+    }
+
+    return ele
+}
