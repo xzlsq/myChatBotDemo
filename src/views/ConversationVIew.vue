@@ -13,6 +13,7 @@ var PageConfig = usePageStore()
 var route = useRoute()
 var question = ref<string>('')
 var idx = computed(() => ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId))
+var newChat = ref(true)
 var divRef = useTemplateRef('output')
 
 const openai = new OpenAI({
@@ -38,6 +39,8 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             role: "user",
             content: question.value
         })
+
+        // 根据附带历史消息数的限制值，准备需要发送给AI的上下文
         var chatContext: ChatCompletionMessageParam[] = []
         if (PageConfig.historyMessage < ChatStore.conversations[idx.value].history.length) {
             chatContext = ChatStore.conversations[idx.value].history.slice(-PageConfig.historyMessage).map((it) => {
@@ -75,6 +78,19 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             content: res[0].content
         })
 
+        if (newChat.value) {
+            var summary = ChatStore.conversations[idx.value].history.map((it) => {
+                return { role: it.role, content: it.content } as ChatCompletionMessageParam
+            })
+    
+            summary.push({role: 'user', content: '请为本次对话起个标题。以纯文本返回'})
+            openai.chat.completions.create({
+                messages: summary,
+                ...ChatStore.chatConfig,
+            }).then((res) => {
+                ChatStore.conversations[idx.value].title = res.choices[0].message.content ?? '新的对话'
+            })
+        }
     }
 }
 
@@ -86,6 +102,12 @@ watch(idx, () => {
         } else {
             divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
         }
+    }
+    // 判断是否是切换到还未开始交流的新对话
+    if (ChatStore.conversations[idx.value].history.length == 0) {
+        newChat.value = true
+    } else {
+        newChat.value = false
     }
 
 })
@@ -104,6 +126,12 @@ onMounted(() => {
         question.value = ChatStore.question
         sendQuestion(null, true)
         ChatStore.question = ''
+    }
+    // 判断是否是还未开始交流的新对话
+    if (ChatStore.conversations[idx.value].history.length == 0) {
+        newChat.value = true
+    } else {
+        newChat.value = false
     }
 })
 

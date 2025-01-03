@@ -38,10 +38,10 @@ export const useChatStore = defineStore('chatRecord', () => {
   function addDialog(id: string, message: message) {
     var idx = conversations.value.findIndex(it => it.chatId == id)
     if (idx >= 0) {
-      // 是否是该聊天的首次对话
-      if (conversations.value[idx].history.length == 0) {
-        conversations.value[idx].title = message.content
-      }
+      // // 是否是该聊天的首次对话
+      // if (conversations.value[idx].history.length == 0) {
+      //   conversations.value[idx].title = message.content
+      // }
       conversations.value[idx].history.push(message)
       localStorage.conversations = JSON.stringify(conversations.value)
     }
