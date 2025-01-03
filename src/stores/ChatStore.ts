@@ -38,10 +38,6 @@ export const useChatStore = defineStore('chatRecord', () => {
   function addDialog(id: string, message: message) {
     var idx = conversations.value.findIndex(it => it.chatId == id)
     if (idx >= 0) {
-      // // 是否是该聊天的首次对话
-      // if (conversations.value[idx].history.length == 0) {
-      //   conversations.value[idx].title = message.content
-      // }
       conversations.value[idx].history.push(message)
       localStorage.conversations = JSON.stringify(conversations.value)
     }
@@ -55,6 +51,14 @@ export const useChatStore = defineStore('chatRecord', () => {
       history: []
     })
     localStorage.conversations = JSON.stringify(conversations.value)
+  }
+  // 删除某个对话
+  function deleteConversation(id: string) {
+    var idx = conversations.value.findIndex(it => it.chatId == id)
+    if (idx >= 0) {
+      conversations.value.splice(idx, 1)
+      localStorage.conversations = JSON.stringify(conversations.value)
+    }
   }
   // 设置大模型参数
   function setChatConfig(option: keyof ChatConfig, value: ChatConfig[keyof ChatConfig]) {
@@ -72,7 +76,14 @@ export const useChatStore = defineStore('chatRecord', () => {
       localStorage.userConfig = JSON.stringify(userConfig.value)
     }
   }
-
+  // 设置对话标题
+  function setTitle(id: string, title: string) {
+    var idx = conversations.value.findIndex(it => it.chatId == id)
+    if (idx >= 0) {
+      conversations.value[idx].title = title
+      localStorage.conversations = JSON.stringify(conversations.value)
+    }
+  }
   function initChatStore() {
     let conversation: Conversations[] = []
     if (localStorage.conversations) {
@@ -103,9 +114,11 @@ export const useChatStore = defineStore('chatRecord', () => {
     userConfig,
     addDialog,
     createConversation,
+    deleteConversation,
     initChatStore,
     setChatConfig,
-    setUserConfig
+    setUserConfig,
+    setTitle
   }
 
 })

@@ -24,6 +24,11 @@ function createNewConversation2() {
   router.replace(`/chat/${ChatStore.conversations[0].chatId}`)
 }
 
+function deleteConversationHandler(e: MouseEvent, id: string) {
+  e.preventDefault()
+  ChatStore.deleteConversation(id)
+}
+
 onMounted(() => {
   ChatStore.initChatStore()
 })
@@ -39,8 +44,9 @@ onMounted(() => {
       </button>
       <div class="w-full grow flex flex-col items-center overflow-auto gap-2">
         <RouterLink :to="`/chat/${chat.chatId}`" v-for="chat of ChatStore.conversations"
-          class="w-[90%] rounded-lg bg-slate-300 p-2 truncate [&.router-link-exact-active]:bg-blue-300">
+          class="group w-[90%] rounded-lg bg-slate-300 p-2 truncate [&.router-link-exact-active]:bg-blue-300 relative">
           {{ chat.title }}
+          <button @click="(e) => deleteConversationHandler(e, chat.chatId)" class="group-hover:block h-full hidden absolute top-0 right-0 p-2">✖️</button>
         </RouterLink>
       </div>
       <button @click="router.push('/setting')" class="bg-gray-300 w-fit px-4 py-2 h-12 rounded-full flex items-center justify-center gap-2">

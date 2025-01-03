@@ -7,12 +7,13 @@ import { useRoute } from 'vue-router';
 import { marked } from 'marked';
 import { convertToHTML } from '@/parseMd';
 import { resizeTextarea } from '@/hooks';
+import router from '@/router';
 
 var ChatStore = useChatStore()
 var PageConfig = usePageStore()
 var route = useRoute()
 var question = ref<string>('')
-var idx = computed(() => ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId))
+var currentChat = computed(() => ChatStore.conversations.find(it => it.chatId == route.params.chatId))
 var newChat = ref(true)
 var divRef = useTemplateRef('output')
 
@@ -39,15 +40,15 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             role: "user",
             content: question.value
         })
-
+        var idx = ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId)
         // 根据附带历史消息数的限制值，准备需要发送给AI的上下文
         var chatContext: ChatCompletionMessageParam[] = []
-        if (PageConfig.historyMessage < ChatStore.conversations[idx.value].history.length) {
-            chatContext = ChatStore.conversations[idx.value].history.slice(-PageConfig.historyMessage).map((it) => {
+        if (PageConfig.historyMessage < ChatStore.conversations[idx].history.length) {
+            chatContext = ChatStore.conversations[idx].history.slice(-PageConfig.historyMessage).map((it) => {
                 return { role: it.role, content: it.content } as ChatCompletionMessageParam
             })
         } else {
-            chatContext = ChatStore.conversations[idx.value].history.map((it) => {
+            chatContext = ChatStore.conversations[idx].history.map((it) => {
                 return { role: it.role, content: it.content } as ChatCompletionMessageParam
             })
         }
@@ -77,9 +78,9 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             role: res[0].role,
             content: res[0].content
         })
-
+        
         if (newChat.value) {
-            var summary = ChatStore.conversations[idx.value].history.map((it) => {
+            var summary = ChatStore.conversations[idx].history.map((it) => {
                 return { role: it.role, content: it.content } as ChatCompletionMessageParam
             })
     
@@ -88,50 +89,64 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
                 messages: summary,
                 ...ChatStore.chatConfig,
             }).then((res) => {
-                ChatStore.conversations[idx.value].title = res.choices[0].message.content ?? '新的对话'
+                var title = res.choices[0].message.content ?? '新的对话'
+                ChatStore.setTitle(route.params.chatId as string, title)
             })
         }
     }
 }
 
-watch(idx, () => {
+watch(() => route.params.chatId, () => {
     divRef.value!.innerHTML = ''
-    for (let chat of ChatStore.conversations[idx.value].history) {
-        if (chat.role == 'user') {
-            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(chat.content)}</div>`
-        } else {
-            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
+    if (currentChat.value) {
+        for (let chat of currentChat.value.history) {
+            if (chat.role == 'user') {
+                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(chat.content)}</div>`
+            } else {
+                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
+            }
         }
-    }
-    // 判断是否是切换到还未开始交流的新对话
-    if (ChatStore.conversations[idx.value].history.length == 0) {
-        newChat.value = true
+        // 判断是否是切换到还未开始交流的新对话
+        if (currentChat.value!.history.length == 0) {
+            newChat.value = true
+        } else {
+            newChat.value = false
+        }
     } else {
-        newChat.value = false
+        router.replace('/')
     }
+})
 
+watch(currentChat, () => {
+    if (!currentChat.value) {
+        router.replace('/')
+    }
 })
 
 onMounted(() => {
     divRef.value!.innerHTML = ''
-    for (let chat of ChatStore.conversations[idx.value].history) {
-        if (chat.role == 'user') {
-            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(chat.content)}</div>`
-        } else {
-            divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
+    if (currentChat.value) {
+        for (let chat of currentChat.value.history) {
+            if (chat.role == 'user') {
+                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(chat.content)}</div>`
+            } else {
+                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
+            }
         }
-    }
-    // 如果是通过homeView输入框创建的对话，则组件加载成功后主动发送在homeView输入框填写的问题
-    if (ChatStore.question.length > 0) {
-        question.value = ChatStore.question
-        sendQuestion(null, true)
-        ChatStore.question = ''
-    }
-    // 判断是否是还未开始交流的新对话
-    if (ChatStore.conversations[idx.value].history.length == 0) {
-        newChat.value = true
+        // 如果是通过homeView输入框创建的对话，则组件加载成功后主动发送在homeView输入框填写的问题
+        if (ChatStore.question.length > 0) {
+            question.value = ChatStore.question
+            sendQuestion(null, true)
+            ChatStore.question = ''
+        }
+        // 判断是否是还未开始交流的新对话
+        if (currentChat.value!.history.length == 0) {
+            newChat.value = true
+        } else {
+            newChat.value = false
+        }
     } else {
-        newChat.value = false
+        router.replace('/')
     }
 })
 
@@ -141,7 +156,7 @@ onMounted(() => {
     <div name="输出框" class="w-full h-full overflow-hidden flex flex-col items-center">
         <div class="w-full h-14 shrink-0 flex items-center justify-center text-2xl border-b border-black">
             <div class="max-w-[200px] truncate">
-                {{ ChatStore.conversations[idx].title }}
+                {{ currentChat?.title || '新的对话' }}
             </div>
         </div>
         <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto space-y-4">
