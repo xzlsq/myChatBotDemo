@@ -28,34 +28,34 @@ var router = useRouter()
                 <div class="h-14 flex items-center justify-center">随机性(temperature)</div>
                 <div class="h-10 w-[200px] px-4 flex items-center justify-center border rounded gap-2">
                     <span class="w-[40px]">{{ ChatStore.chatConfig.temperature }}</span>
-                    <el-slider :min="0" :max="2" :step="0.1" v-model="ChatStore.chatConfig.temperature" />
+                    <el-slider :min="0" :max="2" :step="0.1" :change="ChatStore.setChatConfig('temperature', ChatStore.chatConfig.temperature)" v-model="ChatStore.chatConfig.temperature" />
                 </div>
             </div>
             <div class="flex justify-between items-center h-14 w-full  p-2">
                 <div class="h-14 flex items-center justify-center">核采样(top_p)</div>
                 <div class="h-10 w-[200px] px-4 flex items-center justify-center border rounded gap-2">
                     <span class="w-[40px]">{{ ChatStore.chatConfig.top_p }}</span>
-                    <el-slider :min="0" :max="1" :step="0.1" v-model="ChatStore.chatConfig.top_p" />
+                    <el-slider :min="0" :max="1" :step="0.1" :change="ChatStore.setChatConfig('top_p', ChatStore.chatConfig.top_p)" v-model="ChatStore.chatConfig.top_p" />
                 </div>
             </div>
             <div class="flex justify-between items-center h-14 w-full  p-2">
                 <div class="h-14 flex items-center justify-center">单次回复限制(max_tokens)</div>
                 <div class="h-10 w-[200px] px-4 flex items-center justify-center">
-                    <el-input-number v-model="ChatStore.chatConfig.max_tokens" :min="1" @change="" />
+                    <el-input-number v-model="ChatStore.chatConfig.max_tokens" :min="1" :change="ChatStore.setChatConfig('max_tokens', ChatStore.chatConfig.max_tokens)" />
                 </div>
             </div>
             <div class="flex justify-between items-center h-14 w-full  p-2">
                 <div class="h-14 flex items-center justify-center">话题新鲜度(presence_penalty)</div>
                 <div class="h-10 w-[200px] px-4 flex items-center justify-center border rounded gap-2">
                     <span class="w-[40px]">{{ ChatStore.chatConfig.presence_penalty }}</span>
-                    <el-slider :min="-2" :max="2" :step="0.1" v-model="ChatStore.chatConfig.presence_penalty" />
+                    <el-slider :min="-2" :max="2" :step="0.1" :change="ChatStore.setChatConfig('presence_penalty', ChatStore.chatConfig.presence_penalty)" v-model="ChatStore.chatConfig.presence_penalty" />
                 </div>
             </div>
             <div class="flex justify-between items-center h-14 w-full  p-2">
                 <div class="h-14 flex items-center justify-center">频率惩罚度(frequency_penalty)</div>
                 <div class="h-10 w-[200px] px-4 flex items-center justify-center border rounded gap-2">
                     <span class="w-[40px]">{{ ChatStore.chatConfig.frequency_penalty }}</span>
-                    <el-slider :min="-2" :max="2" :step="0.1" v-model="ChatStore.chatConfig.frequency_penalty" />
+                    <el-slider :min="-2" :max="2" :step="0.1" :change="ChatStore.setChatConfig('frequency_penalty', ChatStore.chatConfig.frequency_penalty)" v-model="ChatStore.chatConfig.frequency_penalty" />
                 </div>
             </div>
             <div class="flex justify-between items-center h-14 w-full  p-2">
