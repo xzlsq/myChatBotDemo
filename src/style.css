@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+div.user,div.system {
+    @apply border
+}
+
+strong.strongEmStyle {
+    @apply italic
+}
