@@ -5,7 +5,7 @@ import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { useChatStore, usePageStore } from '@/stores/ChatStore';
 import { useRoute } from 'vue-router';
 import { marked } from 'marked';
-import { convertToHTML } from '@/parseMd';
+import { convertToHTML3 } from '@/parseMd';
 import { resizeTextarea } from '@/hooks';
 import router from '@/router';
 
@@ -40,7 +40,8 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             role: "user",
             content: question.value
         })
-        var idx = ChatStore.conversations.findIndex(it => it.chatId == route.params.chatId)
+        var id = route.params.chatId
+        var idx = ChatStore.conversations.findIndex(it => it.chatId == id)
         // 根据附带历史消息数的限制值，准备需要发送给AI的上下文
         var chatContext: ChatCompletionMessageParam[] = []
         if (PageConfig.historyMessage < ChatStore.conversations[idx].history.length) {
@@ -71,7 +72,7 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
         var completionsDiv = document.createElement('div')
         completionsDiv.classList.add('system', 'w-full', 'space-y-2')
         divRef.value!.appendChild(completionsDiv)
-        var res = await convertToHTML(resStream, completionsDiv, divRef.value!)
+        var res = await convertToHTML3(resStream, completionsDiv, divRef.value!)
 
         ChatStore.addDialog(route.params.chatId as string, {
             id: Date.now().toString(),
@@ -125,6 +126,7 @@ watch(currentChat, () => {
 
 onMounted(() => {
     divRef.value!.innerHTML = ''
+
     if (currentChat.value) {
         for (let chat of currentChat.value.history) {
             if (chat.role == 'user') {
