@@ -13,6 +13,7 @@ var ChatStore = useChatStore()
 var PageConfig = usePageStore()
 var route = useRoute()
 var question = ref<string>('')
+// 当前对话的聊天记录
 var currentChat = computed(() => ChatStore.conversations.find(it => it.chatId == route.params.chatId))
 var newChat = ref(true)
 var divRef = useTemplateRef('output')
@@ -79,13 +80,13 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             role: res[0].role,
             content: res[0].content
         })
-        
+
         if (newChat.value) {
             var summary = ChatStore.conversations[idx].history.map((it) => {
                 return { role: it.role, content: it.content } as ChatCompletionMessageParam
             })
-    
-            summary.push({role: 'user', content: '请为本次对话起个标题。以纯文本返回'})
+
+            summary.push({ role: 'user', content: '请为本次对话起个标题。以纯文本返回' })
             openai.chat.completions.create({
                 messages: summary,
                 ...ChatStore.chatConfig,
@@ -161,7 +162,7 @@ onMounted(() => {
                 {{ currentChat?.title || '新的对话' }}
             </div>
         </div>
-        <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto space-y-4">
+        <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto space-y-4 flex flex-col">
 
         </div>
         <div name="输入框" class="w-[80%] min-h-16 px-4 my-2 border shrink-0 border-gray-400 bottom-14 
