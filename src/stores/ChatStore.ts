@@ -124,7 +124,7 @@ export const useChatStore = defineStore('chatRecord', () => {
 })
 
 export const usePageStore = defineStore('PageConfig', () => {
-  var fontSize = ref<number>(localStorage.fontSize ? Number(localStorage.fontSize) : 12)
+  var fontSize = ref<number>(localStorage.fontSize ? Number(localStorage.fontSize) : 16)
   var historyMessage = ref<number>(localStorage.historyMessage ? Number(localStorage.historyMessage) : 4)
 
   function setFontSize(val: number) {
