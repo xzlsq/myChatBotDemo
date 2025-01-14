@@ -3,7 +3,14 @@
 @tailwind utilities;
 
 div.user,div.system {
-    @apply border
+    @apply border p-4 rounded-lg w-fit
+}
+div.user {
+    @apply bg-sky-100 self-end
+}
+
+div.system {
+    @apply bg-gray-100 self-start
 }
 
 strong.strongEmStyle {
