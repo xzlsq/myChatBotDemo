@@ -94,8 +94,11 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
                 var title = res.choices[0].message.content ?? '新的对话'
                 ChatStore.setTitle(route.params.chatId as string, title)
             })
+
         }
+
     }
+    
 }
 
 watch(() => route.params.chatId, () => {
@@ -136,18 +139,21 @@ onMounted(() => {
                 divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
             }
         }
-        // 如果是通过homeView输入框创建的对话，则组件加载成功后主动发送在homeView输入框填写的问题
-        if (ChatStore.question.length > 0) {
-            question.value = ChatStore.question
-            sendQuestion(null, true)
-            ChatStore.question = ''
-        }
+
         // 判断是否是还未开始交流的新对话
         if (currentChat.value!.history.length == 0) {
             newChat.value = true
         } else {
             newChat.value = false
         }
+
+        // 如果是通过homeView输入框创建的对话，则组件加载成功后主动发送在homeView输入框填写的问题
+        if (ChatStore.question.length > 0) {
+            question.value = ChatStore.question
+            sendQuestion(null, true)
+            ChatStore.question = ''
+        }
+        
     } else {
         router.replace('/')
     }
