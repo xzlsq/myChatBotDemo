@@ -43,8 +43,8 @@ onMounted(() => {
         <span>➕</span>发起新对话
       </button>
       <div class="w-full grow flex flex-col items-center overflow-auto gap-2">
-        <RouterLink :to="`/chat/${chat.chatId}`" v-for="chat of ChatStore.conversations"
-          class="group w-[90%] rounded-lg bg-slate-300 p-2 truncate [&.router-link-exact-active]:bg-blue-300 relative">
+        <RouterLink :to="`/chat/${chat.chatId}`" :title="chat.title" v-for="chat of ChatStore.conversations"
+          class="group w-[90%] z-20 rounded-lg bg-slate-300 p-2 truncate [&.router-link-exact-active]:bg-blue-300 relative">
           {{ chat.title }}
           <button @click="(e) => deleteConversationHandler(e, chat.chatId)" class="group-hover:block h-full hidden absolute top-0 right-0 p-2">✖️</button>
         </RouterLink>
