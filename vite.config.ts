@@ -24,4 +24,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    proxy: {
+      '/events': 'http://localhost:8000',
+    }
+  }
 })
