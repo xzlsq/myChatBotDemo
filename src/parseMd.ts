@@ -1,3 +1,4 @@
+import type { AxiosResponse } from "axios";
 import { marked } from "marked";
 import type OpenAI from "openai/index.mjs";
 import type { Stream } from "openai/streaming.mjs";
@@ -219,4 +220,17 @@ export async function convertToHTML3(stream: Stream<OpenAI.Chat.Completions.Chat
     outputDivEle.scrollTop = outputDivEle.scrollHeight
 
     return res
+}
+
+export async function convertToHTML4(response: AxiosResponse<any, any> & {
+    _request_id?: string | null;
+}, divEle: HTMLDivElement, outputDivEle: HTMLDivElement) {
+    debugger
+    const stream = response.data.pipeThrough(new TextDecoderStream())
+
+    for await (let chunk of stream) {
+        console.log(chunk)
+    }
+
+    return true
 }
