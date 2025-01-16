@@ -7,7 +7,6 @@ import { marked } from 'marked';
 import { convertToHTML4 } from '@/parseMd';
 import { resizeTextarea } from '@/hooks';
 import router from '@/router';
-import axios from 'axios';
 
 var ChatStore = useChatStore()
 var PageConfig = usePageStore()
@@ -60,31 +59,28 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
 
         question.value = ''
         try {
-            var resStream = await axios({
-                method: 'post',
-                url: '/events',
+            var resStream = await fetch('/events', {
+                method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
                 },
-                data: {
+                body: JSON.stringify({
                     messages: chatContext,
                     stream: true,
                     ...ChatStore.chatConfig,
-                },
-                responseType: 'stream'
+                })
             })
-
             // 创建一个class="system w-full space-y-2"的div，用于显示completions
             var completionsDiv = document.createElement('div')
             completionsDiv.classList.add('system', 'w-full', 'space-y-2')
             divRef.value!.appendChild(completionsDiv)
             var res = await convertToHTML4(resStream, completionsDiv, divRef.value!)
 
-            // ChatStore.addDialog(route.params.chatId as string, {
-            //     id: Date.now().toString(),
-            //     role: res[0].role,
-            //     content: res[0].content
-            // })
+            ChatStore.addDialog(route.params.chatId as string, {
+                id: Date.now().toString(),
+                role: res[0].role,
+                content: res[0].content
+            })
 
             // if (newChat.value) {
             //     var summary = ChatStore.conversations[idx].history.map((it) => {

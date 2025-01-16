@@ -1,4 +1,3 @@
-import type { AxiosResponse } from "axios";
 import { marked } from "marked";
 import type OpenAI from "openai/index.mjs";
 import type { Stream } from "openai/streaming.mjs";
@@ -60,7 +59,7 @@ export async function convertToHTML2(stream: Stream<OpenAI.Chat.Completions.Chat
     debugger
     for await (let chunk of stream) {
         var str = chunk.choices[0].delta.content
-        var strForMatch:any = []
+        var strForMatch: any = []
         if (restStr.length > 0) {
             str = restStr + str
         }
@@ -70,7 +69,7 @@ export async function convertToHTML2(stream: Stream<OpenAI.Chat.Completions.Chat
         res[0].content += chunk.choices[0]?.delta?.content ?? ''
         if (chunk.choices[0]?.delta?.role) {
             res[0].role = chunk.choices[0]?.delta?.role
-        } 
+        }
         if (pEle == null) {
             // 从第二个块开始，如果pEle为空则创建新的段落
             pEle = createEle('p', `paragraphStyle`)
@@ -118,7 +117,7 @@ export async function convertToHTML2(stream: Stream<OpenAI.Chat.Completions.Chat
                     restStr = restPart[0]
                 }
             }
-        } 
+        }
         // 判断是否是无序列表
         else if (twoToken.length >= 2 && twoToken?.match(/(\*\s)|(-\s)/g)) {
             isUl = true
@@ -179,7 +178,7 @@ export async function convertToHTML2(stream: Stream<OpenAI.Chat.Completions.Chat
             listEle = null
             blockEle = null
             return true
-        } 
+        }
         return false
     }
 }
@@ -222,15 +221,26 @@ export async function convertToHTML3(stream: Stream<OpenAI.Chat.Completions.Chat
     return res
 }
 
-export async function convertToHTML4(response: AxiosResponse<any, any> & {
-    _request_id?: string | null;
-}, divEle: HTMLDivElement, outputDivEle: HTMLDivElement) {
-    debugger
-    const stream = response.data.pipeThrough(new TextDecoderStream())
+export async function convertToHTML4(response: Response, divEle: HTMLDivElement, outputDivEle: HTMLDivElement) {
+    var res: { role: string, content: string }[] = [{ role: 'assistant', content: '' }]
+    // 保存完整的句子
+    var str = ''
+    const stream: any = response.body!.pipeThrough(new TextDecoderStream())
 
     for await (let chunk of stream) {
-        console.log(chunk)
+        str += chunk
+        res[0].content += chunk
+        divEle.innerHTML = marked.parse(str) as string
+        // 将聊天框的滚动位置设置到底部，确保最新添加的消息始终可见。
+        // scrollHeight 是聊天框内容的完整高度，scrollTop 是当前滚动的位置。
+        // 将 scrollTop 设置为 scrollHeight 即可滚动到底部。
+        outputDivEle.scrollTop = outputDivEle.scrollHeight
     }
 
-    return true
+    if (str.length != 0) {
+        divEle.innerHTML = marked.parse(str) as string
+    }
+    outputDivEle.scrollTop = outputDivEle.scrollHeight
+
+    return res
 }
