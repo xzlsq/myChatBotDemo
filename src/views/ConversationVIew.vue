@@ -94,7 +94,8 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
                 var title = res.choices[0].message.content ?? '新的对话'
                 ChatStore.setTitle(route.params.chatId as string, title)
             })
-
+            
+            newChat.value = false
         }
 
     }
