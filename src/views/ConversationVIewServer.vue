@@ -82,6 +82,7 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
                 content: res[0].content
             })
 
+            // 如果是首次对话则请求本次对话的聊天标题
             if (newChat.value) {
                 var summary = ChatStore.conversations[idx].history.map((it) => {
                     return { role: it.role, content: it.content } as ChatCompletionMessageParam
