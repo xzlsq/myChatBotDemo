@@ -82,21 +82,31 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
                 content: res[0].content
             })
 
-            // if (newChat.value) {
-            //     var summary = ChatStore.conversations[idx].history.map((it) => {
-            //         return { role: it.role, content: it.content } as ChatCompletionMessageParam
-            //     })
+            if (newChat.value) {
+                var summary = ChatStore.conversations[idx].history.map((it) => {
+                    return { role: it.role, content: it.content } as ChatCompletionMessageParam
+                })
 
-            //     summary.push({ role: 'user', content: '请为本次对话起个标题。以纯文本返回' })
-            //     openai.chat.completions.create({
-            //         messages: summary,
-            //         ...ChatStore.chatConfig,
-            //     }).then((res) => {
-            //         var title = res.choices[0].message.content ?? '新的对话'
-            //         ChatStore.setTitle(route.params.chatId as string, title)
-            //     })
+                summary.push({ role: 'user', content: '请为本次对话起个标题。以纯文本返回' })
+                fetch('/events', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        messages: summary,
+                        stream: true,
+                        ...ChatStore.chatConfig,
+                    })
+                }).then((data) => {
+                    return data.text()
+                }).then((data) => {
+                    var title = data ?? '新的对话'
+                    ChatStore.setTitle(route.params.chatId as string, title)
+                })
 
-            // }
+                newChat.value = false
+            }
         } catch (e) {
             console.error(e)
         }
