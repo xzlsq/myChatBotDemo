@@ -26,7 +26,20 @@ function createNewConversation2() {
 
 function deleteConversationHandler(e: MouseEvent, id: string) {
   e.preventDefault()
-  ChatStore.deleteConversation(id)
+  
+  fetch('/delete', {
+    method: 'DELETE',
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      chatId: id
+    })
+  }).then((data) => {
+    if (data.ok) {
+      ChatStore.deleteConversation(id)
+    }
+  })
 }
 
 onMounted(() => {
@@ -46,10 +59,12 @@ onMounted(() => {
         <RouterLink :to="`/chat/${chat.chatId}`" :title="chat.title" v-for="chat of ChatStore.conversations"
           class="group w-[90%] z-20 rounded-lg bg-slate-300 p-2 truncate [&.router-link-exact-active]:bg-blue-300 relative">
           {{ chat.title }}
-          <button @click="(e) => deleteConversationHandler(e, chat.chatId)" class="group-hover:block h-full hidden absolute top-0 right-0 p-2">✖️</button>
+          <button @click="(e) => deleteConversationHandler(e, chat.chatId)"
+            class="group-hover:block h-full hidden absolute top-0 right-0 p-2">✖️</button>
         </RouterLink>
       </div>
-      <button @click="router.push('/setting')" class="bg-gray-300 w-fit px-4 py-2 h-12 rounded-full flex items-center justify-center gap-2">
+      <button @click="router.push('/setting')"
+        class="bg-gray-300 w-fit px-4 py-2 h-12 rounded-full flex items-center justify-center gap-2">
         <span>⚙️</span>设置
       </button>
     </div>
@@ -59,8 +74,7 @@ onMounted(() => {
         rounded flex justify-center items-center overflow-hidden">
         <textarea @input="(e) => resizeTextarea(e)" autofocus v-model="ChatStore.question"
           class="w-full box-border h-fit resize-none outline-none overflow-hidden"
-          placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送"
-          @keypress="(e) => createNewConversation(e)"></textarea>
+          placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送" @keypress="(e) => createNewConversation(e)"></textarea>
       </div>
     </div>
   </div>
