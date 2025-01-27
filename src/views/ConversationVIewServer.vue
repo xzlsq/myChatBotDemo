@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
-import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { useChatStore, usePageStore } from '@/stores/ChatStore';
 import { useRoute } from 'vue-router';
 import { marked } from 'marked';
@@ -31,51 +30,45 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
         }
         e?.preventDefault()
 
+        const id = route.params.chatId
+
+        // 保存用户的问题到聊天记录中
         ChatStore.addDialog(route.params.chatId as string, {
             id: Date.now().toString(),
             role: "user",
             content: question.value
         })
-        var id = route.params.chatId
-        var idx = ChatStore.conversations.findIndex(it => it.chatId == id)
-        // 根据附带历史消息数的限制值，准备需要发送给AI的上下文
-        var chatContext: ChatCompletionMessageParam[] = []
-        if (PageConfig.historyMessage < ChatStore.conversations[idx].history.length) {
-            chatContext = ChatStore.conversations[idx].history.slice(-PageConfig.historyMessage).map((it) => {
-                return { role: it.role, content: it.content } as ChatCompletionMessageParam
-            })
-        } else {
-            chatContext = ChatStore.conversations[idx].history.map((it) => {
-                return { role: it.role, content: it.content } as ChatCompletionMessageParam
-            })
-        }
-
+        
         divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(question.value)}</div>`
         // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
         divRef.value!.lastElementChild!.scrollIntoView({
             block: 'end',
             behavior: 'smooth'
         })
-
-        question.value = ''
+        
         try {
-            var resStream = await fetch('/events', {
+            const input = question.value
+            question.value = ''
+            // 将用户的问题发送给后端
+            const resStream = await fetch('/normal', {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    messages: chatContext,
-                    stream: true,
-                    ...ChatStore.chatConfig,
+                    question: input,
+                    chatId: id
                 })
             })
+            
             // 创建一个class="system w-full space-y-2"的div，用于显示completions
             var completionsDiv = document.createElement('div')
             completionsDiv.classList.add('system', 'w-full', 'space-y-2')
             divRef.value!.appendChild(completionsDiv)
+            // 将收到的结果转换为HTML显示
             var res = await convertToHTML4(resStream, completionsDiv, divRef.value!)
 
+            // 保存AI的回复到聊天记录中
             ChatStore.addDialog(route.params.chatId as string, {
                 id: Date.now().toString(),
                 role: res[0].role,
@@ -84,20 +77,13 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
 
             // 如果是首次对话则请求本次对话的聊天标题
             if (newChat.value) {
-                var summary = ChatStore.conversations[idx].history.map((it) => {
-                    return { role: it.role, content: it.content } as ChatCompletionMessageParam
-                })
-
-                summary.push({ role: 'user', content: '请为本次对话起个标题。以纯文本返回' })
-                fetch('/events', {
+                fetch('/getTitle', {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        messages: summary,
-                        stream: true,
-                        ...ChatStore.chatConfig,
+                        chatId: id,
                     })
                 }).then((data) => {
                     return data.text()
