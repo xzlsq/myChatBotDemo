@@ -58,7 +58,7 @@ onMounted(() => {
       <div class="w-full grow flex flex-col items-center overflow-auto gap-2">
         <RouterLink :to="`/chat/${chat.chatId}`" :title="chat.title" v-for="chat of ChatStore.conversations"
           class="group w-[90%] z-20 rounded-lg bg-slate-300 p-2 truncate [&.router-link-exact-active]:bg-blue-300 relative">
-          {{ chat.title }}
+          {{ chat.title.length > 0 ? chat.title : '新的对话' }}
           <button @click="(e) => deleteConversationHandler(e, chat.chatId)"
             class="group-hover:block h-full hidden absolute top-0 right-0 p-2">✖️</button>
         </RouterLink>
