@@ -174,11 +174,16 @@ onMounted(() => {
         <div ref="output" class="grow w-full px-8 pt-4 pb-2 overflow-auto space-y-4 flex flex-col">
 
         </div>
-        <div name="输入框" class="w-[80%] min-h-16 px-4 my-2 border shrink-0 border-gray-400 bottom-14 
-      rounded flex justify-center items-center mb-14">
+        <div name="输入框" class="w-[80%] min-h-16 px-4 my-2 py-2 border shrink-0 border-gray-400 bottom-14 
+      rounded flex flex-col justify-center items-center mb-12 bg-gray-100">
             <textarea @input="(e) => resizeTextarea(e)" v-model="question"
-                class="w-full box-border h-fit resize-none outline-none overflow-hidden"
-                placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送" @keypress="(e) => sendQuestion(e, false)"></textarea>
+                class="w-full box-border h-fit resize-none outline-none overflow-hidden bg-gray-100"
+                placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送" @keypress="(e) => sendQuestion(e, false)">
+</textarea>
+<div class="flex h-fit w-full gap-1">
+                <button @click="PageConfig.setThinkOn" :class="{'bg-sky-200': PageConfig.thinkOn}" class="p-2 rounded-full bg-white border !text-sm">💡深度思考</button>
+                <button @click="PageConfig.setSearchOn" :class="{'bg-sky-200': PageConfig.searchOn}" class="p-2 rounded-full bg-white border !text-sm">🌐联网搜索</button>
+            </div>
         </div>
     </div>
 </template>

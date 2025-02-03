@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useChatStore } from '@/stores/ChatStore';
+import { useChatStore, usePageStore } from '@/stores/ChatStore';
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { resizeTextarea } from '@/hooks';
 
 var ChatStore = useChatStore()
+var PageConfig = usePageStore()
 var router = useRouter()
 var route = useRoute()
 
@@ -71,10 +72,15 @@ onMounted(() => {
     <div name="输出框" class="grow overflow-hidden flex flex-col items-center justify-center">
       <RouterView></RouterView>
       <div name="输入框" v-if="route.fullPath == '/'" class="w-[80%] min-h-16 px-4 py-2 border border-gray-400
-        rounded flex justify-center items-center overflow-hidden">
+        rounded flex flex-col justify-center items-center overflow-hidden">
         <textarea @input="(e) => resizeTextarea(e)" autofocus v-model="ChatStore.question"
           class="w-full box-border h-fit resize-none outline-none overflow-hidden"
-          placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送" @keypress="(e) => createNewConversation(e)"></textarea>
+          placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送" @keypress="(e) => createNewConversation(e)">
+        </textarea>
+        <div class="flex h-fit w-full gap-1">
+          <button @click="PageConfig.setThinkOn" :class="{'bg-sky-200': PageConfig.thinkOn}" class="p-2 rounded-full bg-white border !text-sm">💡深度思考</button>
+          <button @click="PageConfig.setSearchOn" :class="{'bg-sky-200': PageConfig.searchOn}" class="p-2 rounded-full bg-white border !text-sm">🌐联网搜索</button>
+        </div>
       </div>
     </div>
   </div>
