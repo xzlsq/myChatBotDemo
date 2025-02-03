@@ -126,6 +126,8 @@ export const useChatStore = defineStore('chatRecord', () => {
 export const usePageStore = defineStore('PageConfig', () => {
   var fontSize = ref<number>(localStorage.fontSize ? Number(localStorage.fontSize) : 16)
   var historyMessage = ref<number>(localStorage.historyMessage ? Number(localStorage.historyMessage) : 4)
+  var searchOn = ref<boolean>(false)
+  var thinkOn = ref<boolean>(false)
 
   function setFontSize(val: number) {
     fontSize.value = val
@@ -138,10 +140,22 @@ export const usePageStore = defineStore('PageConfig', () => {
     localStorage.historyMessage = val
   }
 
+  function setSearchOn() {
+    searchOn.value = !searchOn.value
+  }
+
+  function setThinkOn() {
+    thinkOn.value = !thinkOn.value
+  }
+
   return {
     fontSize,
     historyMessage,
+    searchOn,
+    thinkOn,
     setFontSize,
-    setHistoryMessage
+    setHistoryMessage,
+    setSearchOn,
+    setThinkOn
   }
 })
