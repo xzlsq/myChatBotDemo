@@ -57,7 +57,9 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
                 },
                 body: JSON.stringify({
                     question: input,
-                    chatId: id
+                    chatId: id,
+                    searchOn: PageConfig.searchOn,
+                    thinkOn: PageConfig.thinkOn,
                 })
             })
             
