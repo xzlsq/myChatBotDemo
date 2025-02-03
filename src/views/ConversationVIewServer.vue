@@ -39,7 +39,7 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
             content: question.value
         })
         
-        divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(question.value)}</div>`
+        divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${question.value}</div>`
         // 当出现滚动条时，有新内容添加时则自动滚动到新内容处
         divRef.value!.lastElementChild!.scrollIntoView({
             block: 'end',
@@ -92,6 +92,8 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
                 }).then((data) => {
                     var title = data ?? '新的对话'
                     ChatStore.setTitle(route.params.chatId as string, title)
+                }, (rej) => {
+                    console.error(rej)
                 })
 
                 newChat.value = false
@@ -111,7 +113,7 @@ watch(() => route.params.chatId, () => {
     if (currentChat.value) {
         for (let chat of currentChat.value.history) {
             if (chat.role == 'user') {
-                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(chat.content)}</div>`
+                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${chat.content}</div>`
             } else {
                 divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
             }
@@ -139,7 +141,7 @@ onMounted(() => {
     if (currentChat.value) {
         for (let chat of currentChat.value.history) {
             if (chat.role == 'user') {
-                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${marked.parse(chat.content)}</div>`
+                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${chat.content}</div>`
             } else {
                 divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="system w-full space-y-2">${marked.parse(chat.content)}</div>`
             }
@@ -181,8 +183,8 @@ onMounted(() => {
             <textarea @input="(e) => resizeTextarea(e)" v-model="question"
                 class="w-full box-border h-fit resize-none outline-none overflow-hidden bg-gray-100"
                 placeholder="问一问... | 按下Shift+Enter换行 | 按下Enter发送" @keypress="(e) => sendQuestion(e, false)">
-</textarea>
-<div class="flex h-fit w-full gap-1">
+            </textarea>
+            <div class="flex h-fit w-full gap-1">
                 <button @click="PageConfig.setThinkOn" :class="{'bg-sky-200': PageConfig.thinkOn}" class="p-2 rounded-full bg-white border !text-sm">💡深度思考</button>
                 <button @click="PageConfig.setSearchOn" :class="{'bg-sky-200': PageConfig.searchOn}" class="p-2 rounded-full bg-white border !text-sm">🌐联网搜索</button>
             </div>
