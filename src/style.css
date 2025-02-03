@@ -6,11 +6,15 @@ div.user,div.system {
     @apply border p-4 rounded-lg w-fit
 }
 div.user {
-    @apply bg-sky-100 self-end
+    @apply bg-sky-100 self-end max-w-full break-all
 }
 
 div.system {
-    @apply bg-gray-100 self-start
+    @apply bg-gray-100 self-start break-all
+}
+
+div.system a {
+    @apply underline text-green-700 
 }
 
 strong.strongEmStyle {
