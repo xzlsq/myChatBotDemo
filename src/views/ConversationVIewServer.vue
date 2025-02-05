@@ -122,6 +122,9 @@ watch(() => route.params.chatId, () => {
         // 判断是否是切换到还未开始交流的新对话
         if (currentChat.value!.history.length == 0) {
             newChat.value = true
+            if (currentChat.value?.customPromot) {
+                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${currentChat.value?.customPromot}</div>`
+            }
         } else {
             newChat.value = false
         }
@@ -151,6 +154,9 @@ onMounted(() => {
         // 判断是否是还未开始交流的新对话
         if (currentChat.value!.history.length == 0) {
             newChat.value = true
+            if (currentChat.value?.customPromot) {
+                divRef.value!.innerHTML = divRef.value!.innerHTML + `<div class="user w-full space-y-2">${currentChat.value?.customPromot}</div>`
+            }
         } else {
             newChat.value = false
         }
