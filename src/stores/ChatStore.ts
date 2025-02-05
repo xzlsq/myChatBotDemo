@@ -6,7 +6,8 @@ type Conversations = {
   chatId: string,
   title: string,
   createAt: string,
-  history: message[]
+  history: message[],
+  customPromot: string
 }
 
 type ChatConfig = {
@@ -43,12 +44,14 @@ export const useChatStore = defineStore('chatRecord', () => {
     }
   }
   // 创建一个新对话
-  function createConversation() {
+  function createConversation(promot: string = '') {
+    var chatId = Math.random().toString(16).slice(2)
     conversations.value.unshift({
-      chatId: Math.random().toString(16).slice(2),
+      chatId,
       title: '新的对话',
       createAt: Date.now().toString(),
-      history: []
+      history: [],
+      customPromot: promot
     })
     localStorage.conversations = JSON.stringify(conversations.value)
   }
@@ -128,6 +131,7 @@ export const usePageStore = defineStore('PageConfig', () => {
   var historyMessage = ref<number>(localStorage.historyMessage ? Number(localStorage.historyMessage) : 4)
   var searchOn = ref<boolean>(false)
   var thinkOn = ref<boolean>(false)
+  // var maskOn = ref<boolean>(false)
 
   function setFontSize(val: number) {
     fontSize.value = val
