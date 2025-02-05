@@ -26,7 +26,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/events': 'http://localhost:8000',
+      '/normal': 'http://localhost',
+      '/getTitle': 'http://localhost',
+      '/delete': 'http://localhost',
     }
   }
 })
