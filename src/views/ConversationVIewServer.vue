@@ -60,6 +60,7 @@ async function sendQuestion(e: KeyboardEvent | null, manual: boolean) {
                     chatId: id,
                     searchOn: PageConfig.searchOn,
                     thinkOn: PageConfig.thinkOn,
+                    customPrompt: currentChat.value?.customPromot
                 })
             })
             
