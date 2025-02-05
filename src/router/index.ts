@@ -20,6 +20,10 @@ const router = createRouter({
           path: 'setting',
           component: () => import('@/views/Setting.vue'),
         },
+        {
+          path: 'selectMask',
+          component: () => import('@/views/masks.vue'),  
+        }
       ]
     },
   ],
