@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import ConversationVIew from '@/views/ConversationVIew.vue'
+import ConversationVIewServer from '@/views/ConversationVIewServer.vue'
 
 
 const router = createRouter({
@@ -13,7 +14,7 @@ const router = createRouter({
       children: [
         {
           path: 'chat/:chatId',
-          component: ConversationVIew,
+          component: ConversationVIewServer,
         },
         {
           path: 'setting',
